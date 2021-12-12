@@ -68,7 +68,7 @@ export class Results extends Component<ResultsProps,ResultsState> {
                         {
                             this.props.results.map((r, i) => {
                                 return (
-                                    <li key={i}><a target={"_blank"} rel="noreferrer" href={r.url}>[{r.source}]: {r.title} (score: {r.score})</a></li>
+                                    <li key={i}><a target={"_blank"} rel="noreferrer" href={r.url}>[{r.source}]: {r.title} (score: {r.score.toFixed(2)})</a></li>
                                 )
                             })
                         }
