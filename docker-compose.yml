@@ -1,0 +1,49 @@
+version: "3.9"
+services:
+  web:
+    build:
+      context: './web'
+      dockerfile: './Dockerfile'
+    image: public.ecr.aws/znetstar/covid-article-search-engine-web
+    links:
+      - engine
+    environment:
+      - 'ENGINE_URI=http://engine/rpc'
+      - 'PORT=80'
+    ports:
+      - '3000:80'
+  engine:
+    build:
+      context: './engine'
+      dockerfile: './Dockerfile'
+    image: public.ecr.aws/znetstar/covid-article-search-engine-engine
+    links:
+      - mongo
+      - redis_mq
+      - redis_cache
+    environment:
+      - 'PORT=80'
+      - MONGO_URI=mongodb://mongo/covid-article-search-engine
+      - REDIS_MQ_URI=redis://redis_mq
+      - REDIS_CACHE_URI=redis://redis_cache
+  mongo:
+    image: "mongo:4.4"
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongo:/data/db
+  redis_cache:
+    image: "redis:6"
+    command: "redis-server --save \"\" --appendonly no --maxmemory 128mb --maxmemory-policy allkeys-lru"
+    ports:
+      - "127.0.0.1:6379:6379"
+  redis_mq:
+    image: "redis:6"
+    command: "redis-server --dir /data/redis_mq --appendonly yes --maxmemory 512mb --maxmemory-policy noeviction"
+    ports:
+      - "127.0.0.1:6381:6379"
+    volumes:
+      - redis_mq:/data/redis_mq
+volumes:
+  mongo:
+  redis_mq:

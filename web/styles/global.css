@@ -1,0 +1,14 @@
+
+div#__next {
+    display: flex;
+    justify-content: center;
+}
+
+#header {
+    text-align: center;
+    font-size:1em;
+}
+
+#box > * {
+    margin: 0 0.5em;
+}
