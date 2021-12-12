@@ -21,6 +21,7 @@ export async function getConfig(): Promise<Config> {
           covidInTitle: 0.2,
           covidInUrl: 0.2
         },
+        forceSeed: !!process.env.FORCE_SEED,
         mongoUri: process.env.MONGO_URI ||  'mongodb://localhost:27017/covid-article-crawler',
         redisMqUri: process.env.REDIS_MQ_URI || process.env.REDIS_URI ||  'redis://localhost:6379/0',
         redisCacheUri: process.env.REDIS_CACHE_URI || process.env.REDIS_URI ||  'redis://localhost:6379/1',

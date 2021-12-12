@@ -36,6 +36,7 @@ export interface Config {
     redisCacheUri: string;
     playwrightConfig?: LaunchOptions;
     transferCookies?: boolean;
+    forceSeed?: boolean;
     cookies?: { profile?: string, name: string }
     rubric: {
         marker: number;
