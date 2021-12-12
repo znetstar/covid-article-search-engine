@@ -219,5 +219,6 @@ export async function initControl()  {
         await rpcServer.listen();
         console.info(`rpc listening on port ${RPC_PORT}`);
         rpcServer.methods.doSearch = doSearch;
+        rpcServer.methods.numDocs = async  ()  => db.collection('articles').find({ tfidf: { $exists: true } }).count();
     }
 }

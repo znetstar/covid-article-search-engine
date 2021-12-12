@@ -58,7 +58,7 @@ export class Results extends Component<ResultsProps,ResultsState> {
                 </div>
 
                 <div>
-                    <h2>Results for &quot;{this.props.query}&quot;</h2>
+                    <h2>Found {this.props.results.length} results matching &quot;{this.props.query}&quot;</h2>
                     <div>
                         <Button
                             onClick={() => { this.props.router.push('/'); }}
