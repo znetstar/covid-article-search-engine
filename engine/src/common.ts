@@ -80,6 +80,6 @@ export type ScoredSearchResult = (IndexedScrapeResult&{  tfidf: { k:string, v: T
 
 export type FinalSearchResult = ArticleData&{
     url: string;
-
+    source: string;
     score: number;
 }

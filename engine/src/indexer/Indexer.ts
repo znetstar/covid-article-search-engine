@@ -250,6 +250,7 @@ export async function doSearch(input: string): Promise<FinalSearchResult[]> {
 
     return results.map((d): FinalSearchResult => {
         return {
+            source: d.name,
             ...d.data,
             score: d.score,
             url: d.url

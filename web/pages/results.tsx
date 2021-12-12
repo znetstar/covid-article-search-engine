@@ -30,6 +30,7 @@ interface Result {
     "author": string,
     "source" : string,
     "published" : string,
+    score: number,
     "ttr" : number
 }
 
@@ -63,7 +64,7 @@ export class Results extends Component<ResultsProps,ResultsState> {
                         {
                             this.props.results.map((r, i) => {
                                 return (
-                                    <li key={i}><a target={"_blank"} rel="noreferrer" href={r.url}>{r.title}</a></li>
+                                    <li key={i}><a target={"_blank"} rel="noreferrer" href={r.url}>[{r.source}]: {r.title} (score: {r.score})</a></li>
                                 )
                             })
                         }
