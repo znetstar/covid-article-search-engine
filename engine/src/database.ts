@@ -21,6 +21,7 @@ export async function initDatabase(): Promise<DatabaseDelta> {
     }
 
     await dbDelta.db.collection('articles').createIndex({ url: 1 }, { unique: true });
+    // await dbDelta.db.collection('articles').createIndex({ 'data.url': 1 }, { unique: true });
     await dbDelta.db.collection('articles').createIndex({ tfidf: -1 }, {});
     await dbDelta.db.collection('articles').createIndex({ terms_k: 1 }, {});
 

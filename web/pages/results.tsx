@@ -83,7 +83,7 @@ export class Results extends Component<ResultsProps,ResultsState> {
 export default withRouter(Results);
 
 export async function getServerSideProps(context: any) {
-    const query  = context.req.url.indexOf('query=') !== -1 ? context.req.url.split('?query=').pop().split('&').shift() : '';
+    const query  = decodeURIComponent(context.req.url.indexOf('query=') !== -1 ? context.req.url.split('?query=').pop().split('&').shift() : '');
     const body: { result: Result[] } = await (await fetch(process.env.ENGINE_URI as string, {
         method: 'POST',
         headers: {
