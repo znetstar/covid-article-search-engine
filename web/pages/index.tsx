@@ -21,6 +21,7 @@ export class Home extends Component<HomeProps, HomeState> {
         <div id={"main"}>
           <div id={"header"}>
             <h1>COVID-19 Search Engine</h1>
+              <div><a href={'https://zb.gy/gh/covid-article-search-engine'} target={"_blank"} rel="noreferrer">See source on GitHub</a></div>
           </div>
           <div id={"box"}>
               <TextField onChange={(e) => this.setState({ query: e.target.value })}
