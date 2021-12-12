@@ -9,7 +9,9 @@ node {
       ]]) {
          sh "AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}' AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}' aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/znetstar"
          sh 'docker buildx create --use'
-         sh "docker buildx bake --push --set *.platform=linux/amd64,linux/arm64"
+//          sh "docker buildx bake --push --set *.platform=linux/amd64,linux/arm64"
+         sh "docker buildx bake --push --set *.platform=linux/arm64"
+
          sh "AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}' AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}' aws ecs update-service --cluster shop-svc --service covid-article-search-engine --force-new-deployment --region us-east-1"
       }
     }
