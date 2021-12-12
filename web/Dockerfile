@@ -25,7 +25,7 @@ ADD ./package.json /app/package.json
 
 ADD ./package-lock.json /app/package-lock.json
 
-RUN npm install -g typescript && \
+RUN ln -sv /usr/bin/python3 /usr/bin/python || true && npm install -g typescript && \
     npm ci
 
 ADD . /app
