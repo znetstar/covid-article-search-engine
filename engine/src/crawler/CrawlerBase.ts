@@ -78,7 +78,7 @@ export abstract class CrawlerBase {
         let E: any
         let result: any = null;
         try {
-            await page.goto(link, { timeout: 25e3 });
+            await page.goto(link, { timeout: 60e3, waitUntil: 'domcontentloaded' });
 
             await new Promise<void>((resolve, reject) => setTimeout(() => resolve(), 5e3));
 
@@ -133,9 +133,9 @@ export abstract class CrawlerBase {
             content: jq
         });
     }
-    
+
     protected abstract isCovid(page: Page): Promise<{ isCovid: boolean, links: string[] }>;
-    
+
     protected async* emitLinks(opts: Partial<{ link: string, links: string[] }>): AsyncGenerator<CrawlResult> {
         const { redisCache, db } =  await initDatabase();
         const  {  link, links } = opts;
@@ -166,7 +166,7 @@ export abstract class CrawlerBase {
         const page = await this.ctx.newPage();
         let E: any;
         try {
-            await page.goto(link);
+            await page.goto(link, { timeout: 60e3, waitUntil: 'domcontentloaded' });
 
             await CrawlerBase.injectJquery(page);
             await new Promise<void>((resolve, reject) => setTimeout(() => resolve(), 5e3));

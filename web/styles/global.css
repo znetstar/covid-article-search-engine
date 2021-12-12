@@ -12,3 +12,9 @@ div#__next {
 #box > * {
     margin: 0 0.5em;
 }
+
+#box {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+}
