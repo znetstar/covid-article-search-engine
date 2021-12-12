@@ -78,7 +78,7 @@ export abstract class CrawlerBase {
         let E: any
         let result: any = null;
         try {
-            await page.goto(link, { timeout: 60e3, waitUntil: 'domcontentloaded' });
+            await page.goto(link, { timeout: 30e3, waitUntil: 'load' });
 
             await new Promise<void>((resolve, reject) => setTimeout(() => resolve(), 5e3));
 
@@ -166,7 +166,7 @@ export abstract class CrawlerBase {
         const page = await this.ctx.newPage();
         let E: any;
         try {
-            await page.goto(link, { timeout: 60e3, waitUntil: 'domcontentloaded' });
+            await page.goto(link, { timeout: 30e3, waitUntil: 'load' });
 
             await CrawlerBase.injectJquery(page);
             await new Promise<void>((resolve, reject) => setTimeout(() => resolve(), 5e3));

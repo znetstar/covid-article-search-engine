@@ -75,7 +75,7 @@ export async function initControl()  {
 
             } catch (err) {
                 console.log(err);
-                throw err;
+                // throw err;
             }
         }, {
             connection,
@@ -105,7 +105,7 @@ export async function initControl()  {
                 );
             } catch (err) {
                 console.log(err);
-                throw err;
+                // throw err;
             }
         }, {
             connection,
@@ -139,7 +139,7 @@ export async function initControl()  {
 
             } catch (err) {
                 console.log(err);
-                throw err;
+                // throw err;
             }
         }, {
             connection,
