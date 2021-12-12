@@ -188,23 +188,24 @@ export async function initControl()  {
 
     let dbCount = await db.collection('articles').find({ name: 'Economist' }).count();
 
-    if (!dbCount) {
+    if (config.forceSeed || !dbCount) {
         await crawlerQueue.add('Economist',{ url: 'https://www.economist.com/science-and-technology/2021/11/28/what-to-do-about-covid-19s-threatening-new-variant' }, { priority: 0 });
         // await crawlerQueue.add('COVIDCorpus', { url: 'https://www.paho.org/journal/en/special-issues/scientific-papers-and-resources-covid-19' });
     }
 
     dbCount = await db.collection('articles').find({ name: 'WSJ' }).count();
 
-    if (!dbCount) {
+    if (config.forceSeed || !dbCount) {
         await crawlerQueue.add('WSJ',{ url: 'https://www.wsj.com/articles/as-omicron-threat-looms-delta-variant-pushes-covid-19-cases-higher-11638633600' }, { priority: 0 });
     }
 
     dbCount = await db.collection('articles').find({ name: 'NYTimes' }).count();
 
-    if (!dbCount) {
+    if (config.forceSeed || !dbCount) {
         await crawlerQueue.add('NYTimes',{ url: 'https://www.nytimes.com/2021/12/03/us/coronavirus-omicron-sequencing.html' }, { priority: 0 });
     }
-    else {
+
+    // else {
         let needsIndex: any;
         let cur: any = db.collection('articles').find({
             tfidf: {$exists: false}
@@ -212,7 +213,7 @@ export async function initControl()  {
         while (needsIndex = await cur.next()) {
             await indexerQueue.add('indexer', {id: needsIndex._id});
         }
-    }
+    // }
 
      if (config.functions.rpc) {
         await rpcServer.listen();
