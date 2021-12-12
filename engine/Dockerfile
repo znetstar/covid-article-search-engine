@@ -10,6 +10,7 @@ RUN sed -i -e "s/archive.ubuntu.com/$APT_MIRROR/g" /etc/apt/sources.list && \
     bash -c 'curl -fsSL https://deb.nodesource.com/setup_14.x | bash' && \
     apt-get update -y && \
     apt-get install -o Dpkg::Options::="--force-confold"  -y build-essential \
+          python3 \
       nodejs && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/*
