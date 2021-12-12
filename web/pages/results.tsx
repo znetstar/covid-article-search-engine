@@ -1,4 +1,4 @@
-import { Component } from 'react'
+import { Component, Fragment } from 'react'
 import Head from 'next/head'
 import Image from 'next/image'
 import { withRouter, NextRouter } from 'next/router'
@@ -48,7 +48,11 @@ export class Results extends Component<ResultsProps,ResultsState> {
             return;
         }
         return (
-            <div>
+            <Fragment>
+                <Head>
+                    <title>COVID-19 Article Search Engine</title>
+                </Head>
+                <div>
                 <div>
                     <h1>COVID-19 Search Engine</h1>
                 </div>
@@ -71,6 +75,7 @@ export class Results extends Component<ResultsProps,ResultsState> {
                     </ul>
                 </div>
             </div>
+            </Fragment>
         )
     }
 }
