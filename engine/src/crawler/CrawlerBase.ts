@@ -78,7 +78,7 @@ export abstract class CrawlerBase {
         let E: any
         let result: any = null;
         try {
-            await page.goto(link);
+            await page.goto(link, { timeout: 25e3 });
 
             await new Promise<void>((resolve, reject) => setTimeout(() => resolve(), 5e3));
 
