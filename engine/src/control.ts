@@ -79,10 +79,10 @@ export async function initControl()  {
             }
         }, {
             connection,
-            // limiter: {
-            //     max: 50,
-            //     duration: 60e3 * 10
-            // }
+            limiter: {
+                max: 100,
+                duration: 60e3 * 10
+            }
         });
     }
 
@@ -109,10 +109,10 @@ export async function initControl()  {
             }
         }, {
             connection,
-            // limiter: {
-            //     max: 50,
-            //     duration: 60e3 * 10
-            // }
+            limiter: {
+                max: 100,
+                duration: 60e3 * 10
+            }
         });
     }
 
@@ -143,10 +143,10 @@ export async function initControl()  {
             }
         }, {
             connection,
-            // limiter: {
-            //     max: 50,
-            //     duration: 60e3 * 10
-            // }
+            limiter: {
+                max: 100,
+                duration: 60e3 * 10
+            }
         });
     }
     if (config.functions.scraper) {
@@ -179,10 +179,10 @@ export async function initControl()  {
             }
         }, {
             connection,
-            // limiter: {
-            //     max: 50,
-            //     duration: 60e3 * 10
-            // }
+            limiter: {
+                max: 100,
+                duration: 60e3 * 10
+            }
         });
     }
 
