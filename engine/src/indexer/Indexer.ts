@@ -135,7 +135,7 @@ export async function indexTextAsMapping(arr: [ string, number ][]): Promise<{ k
     for (let val of (await  indexTextFull(arr)))  {
         map.push({ k: val[0], v: val[1] });
     }
-    
+
     return map;
 }
 
@@ -170,7 +170,7 @@ export async function indexDocument(inputDoc: ScrapeResult): Promise<TFIDFResult
             }
         });
     }
-    
+
     return sourceDoc as TFIDFResult;
 }
 
@@ -203,59 +203,88 @@ async function getAllTerms(noCache: boolean = false): Promise<string[]> {
 }
 
 export async function doSearch(input: string): Promise<FinalSearchResult[]> {
-    const { redisCache, db } = await initDatabase();
+  try {
+    const {redisCache, db} = await initDatabase();
     const terms = tokenizeText(input);
 
-    const matches = db.collection('articles').find({
-        'terms_k': { $in: terms.map(t => t[0]) },
-        tfidf: { $exists: true }
-    }, {
-        projection: {
-            // @ts-ignore
-            data: 1,
-            url: 1,
-            score: 1,
-            terms_k: 1,
-            tfidf: 1,
-            terms_v: 1
+    const matches = db.collection('articles').aggregate([
+      {
+        $sort: {
+          terms_k: 1,
+          name: 1
         }
-    });
+      },
+      {
+        $match: {
+          'terms_k': {$in: terms.map(t => t[0])},
+          tfidf: {$exists: true}
+        }
+      },
+      {
+        $group: {
+          _id: '$data.url',
+          doc: {
+            $max: '$$ROOT'
+          }
+        }
+      },
+      {
+        $replaceRoot: {
+          newRoot: '$doc'
+        }
+      },
+      {
+        $project: {
+          // @ts-ignore
+          data: 1,
+          url: 1,
+          score: 1,
+          terms_k: 1,
+          tfidf: 1,
+          terms_v: 1
+        }
+      }
+    ]);
 
     let match: ScoredSearchResult;
     const qTerms = await indexText(terms);
 
-    let qLen: number =  0;
-    for (const n of qTerms) qLen += n[1]**2;
+    let qLen: number = 0;
+    for (const n of qTerms) qLen += n[1] ** 2;
 
     const results: ScoredSearchResult[] = [];
     while (match = (await matches.next() as unknown as ScoredSearchResult)) {
-        const matchTerms = mergeTerms(match);
-        const allTerms = Array.from((new Set(terms.map(t => t[0]).concat(matchTerms.map(t => t[0])))).values());
-        let sim = 0;
-        let docLen = 0;
-        for (let term of allTerms) {
-            if (matchTerms.map(x => x[0]).includes(term) && terms.map(x => x[0]).includes(term)) {
-                let dTfidf = match.tfidf.find(x => x.k === term).v.tf*match.tfidf.find(x => x.k === term).v.idf;
-                let qTfidf = qTerms.filter(t => t[0] === term)[0][1];
+      const matchTerms = mergeTerms(match);
+      const allTerms = Array.from((new Set(terms.map(t => t[0]).concat(matchTerms.map(t => t[0])))).values());
+      let sim = 0;
+      let docLen = 0;
+      for (let term of allTerms) {
+        if (matchTerms.map(x => x[0]).includes(term) && terms.map(x => x[0]).includes(term)) {
+          let dTfidf = match.tfidf.find(x => x.k === term).v.tf * match.tfidf.find(x => x.k === term).v.idf;
+          let qTfidf = qTerms.filter(t => t[0] === term)[0][1];
 
-                sim += dTfidf*qTfidf;
-                docLen += dTfidf**2;
-            }
+          sim += dTfidf * qTfidf;
+          docLen += dTfidf ** 2;
         }
+      }
 
-        match.score = (sim/Math.sqrt(docLen+qLen));
-        results.push(match);
+      match.score = (sim / Math.sqrt(docLen + qLen));
+      results.push(match);
     }
 
 
     return results.map((d): FinalSearchResult => {
-        return {
-            source: d.name,
-            ...d.data,
-            score: d.score,
-            url: d.url
-        }
-    }).sort((a,b) => {
-        return b.score - a.score;
+      return {
+        source: d.name,
+        ...d.data,
+        score: d.score,
+        url: d.url
+      }
+    }).sort((a, b) => {
+      return b.score - a.score;
     });
+  } catch (err) {
+    console.warn(err);
+    throw err;
+  }
 }
