@@ -317,6 +317,7 @@ export async function doSearch(input: string): Promise<FinalSearchResult[]> {
     for (const n of qTerms) qLen += n[1] ** 2;
 
     const results: ScoredSearchResult[] = [];
+    let i = 0;
     while (match = (await matches.next() as unknown as ScoredSearchResult)) {
       const matchTerms = mergeTerms(match);
       const allTerms = Array.from((new Set(terms.map(t => t[0]).concat(matchTerms.map(t => t[0])))).values());
@@ -334,6 +335,8 @@ export async function doSearch(input: string): Promise<FinalSearchResult[]> {
 
       match.score = (sim / Math.sqrt(docLen + qLen));
       results.push(match);
+      if (i++ > 20)
+        break;
     }
 
 
