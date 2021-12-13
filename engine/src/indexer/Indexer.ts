@@ -260,12 +260,12 @@ export async function doSearch(input: string): Promise<FinalSearchResult[]> {
     const terms = tokenizeText(input);
 
     const matches = db.collection('articles').aggregate([
-      // {
-      //   $sort: {
-      //     terms_k: 1,
-      //     name: 1
-      //   }
-      // },
+      {
+        $sort: {
+          terms_k: 1,
+          name: 1
+        }
+      },
       {
         $match: {
           'terms_k': {$in: terms.map(t => t[0])},
