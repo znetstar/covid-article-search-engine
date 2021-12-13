@@ -101,7 +101,7 @@ export async function initControl()  {
             try {
                 const doc = await db.collection('articles').findOne({ _id: new ObjectId(job.data.id) });
                 if (!doc)  return;
-                const updatedDoc = await indexDocument(doc as unknown as ScrapeResult);
+                const updatedDoc = await indexDocument(doc as unknown as ScrapeResult, indexerQueue);
 
                 console.log('index '+updatedDoc.url);
                 await db.collection('articles').updateOne(
@@ -214,6 +214,14 @@ export async function initControl()  {
         await crawlerQueue.add('NYTimes',{ url: 'https://www.nytimes.com/2021/12/03/us/coronavirus-omicron-sequencing.html' }, { priority: 0 });
     }
 
+
+  if (config.functions.rpc) {
+    await rpcServer.listen();
+    console.info(`rpc listening on port ${RPC_PORT}`);
+    rpcServer.methods.doSearch = doSearch;
+    rpcServer.methods.numDocs = async  ()  => db.collection('articles').find({ tfidf: { $exists: true } }).count();
+  }
+
     // else {
         let needsIndex: any;
         let cur: any = db.collection('articles').find({
@@ -224,10 +232,5 @@ export async function initControl()  {
         }
     // }
 
-     if (config.functions.rpc) {
-        await rpcServer.listen();
-        console.info(`rpc listening on port ${RPC_PORT}`);
-        rpcServer.methods.doSearch = doSearch;
-        rpcServer.methods.numDocs = async  ()  => db.collection('articles').find({ tfidf: { $exists: true } }).count();
-    }
+
 }

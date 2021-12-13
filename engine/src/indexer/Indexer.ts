@@ -205,7 +205,7 @@ export async function rollIdf(indexQueue: Queue): Promise<void> {
 }
 
 type TFIDFResult = IndexedScrapeResult&{tfidf: { k:string, v: TfidfMapping }[] };
-export async function indexDocument(inputDoc: ScrapeResult): Promise<TFIDFResult> {
+export async function indexDocument(inputDoc: ScrapeResult, indexerQueue?: Queue): Promise<TFIDFResult> {
     const {
         db,
         redisCache
@@ -222,6 +222,10 @@ export async function indexDocument(inputDoc: ScrapeResult): Promise<TFIDFResult
     }
 
     await pipe.exec();
+
+  rollIdf(indexerQueue).catch(err => {
+    console.warn(err.stack);
+  });
 
     return sourceDoc as TFIDFResult;
 }
