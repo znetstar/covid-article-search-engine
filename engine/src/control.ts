@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {CrawlAction, CrawlerOrScraperDoesNotExistError, initPlaywright, ScrapeResult} from "./common";
 import {getConfig, RPC_PORT} from "./config";
-import {doSearch, indexDocument, tokenizeDocument} from "./indexer/Indexer";
+import {doSearch, indexDocument, rollIdf, tokenizeDocument} from "./indexer/Indexer";
 import {ObjectId} from "mongodb";
 import {JSONSerializer, HTTPTransport, Server as RPCServer} from 'multi-rpc';
 import {SerializationFormat} from "@etomon/encode-tools/lib/EncodeTools";
@@ -57,6 +57,15 @@ export async function initControl()  {
     const scraperQueueSch = new QueueScheduler('scraper', { connection });
     const tokenizeQueueSch = new QueueScheduler('tokenize', { connection });
     const indexQueueSch = new QueueScheduler('indexer', { connection });
+
+
+    indexerQueue.on('drain', () => {
+      console.log(`drain rolling idf`);
+
+      rollIdf(indexerQueue).catch(err => {
+        console.warn(err.stack);
+      });
+    });
 
     if ((config).transferCookies)
         await CrawlerBase.transferCookies();

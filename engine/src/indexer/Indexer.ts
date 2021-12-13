@@ -1,6 +1,7 @@
 import {initDatabase} from "../database";
 import {FinalSearchResult, IndexedScrapeResult, ScoredSearchResult, ScrapeResult, TfidfMapping} from "../common";
 import {ObjectId} from "mongodb";
+import {Queue} from "bullmq";
 const stem = require( 'wink-porter2-stemmer' );
 
 const winkNLP = require( 'wink-nlp' );
@@ -150,11 +151,17 @@ function mergeTerms(sourceDoc: IndexedScrapeResult): [string,number][] {
 
 let idfTimeout: any;
 
-export async function rollIdf(): Promise<void> {
+export async function rollIdf(indexQueue: Queue): Promise<void> {
   const {
     db,
     redisCache
   } = await initDatabase();
+  const count = await indexQueue.getActiveCount();
+  if (count) {
+    console.log('skipping idf roll because active count');
+    return;
+  }
+
   const [[_1, term], [ _2, proceed ]] = await redisCache.pipeline()
     .rpop('idfQueue')
     .setnx('idfRoll', 1)
@@ -164,7 +171,7 @@ export async function rollIdf(): Promise<void> {
     if (!idfTimeout)
       idfTimeout = setTimeout(() => {
         idfTimeout = void(0);
-        rollIdf().catch((err => console.warn(err.stack)))
+        rollIdf(indexQueue).catch((err => console.warn(err.stack)))
       }, 30e3);
     return;
   }
@@ -193,7 +200,8 @@ export async function rollIdf(): Promise<void> {
 
   await redisCache.del('idfRoll');
 
-  return rollIdf();
+
+  return rollIdf(indexQueue);
 }
 
 type TFIDFResult = IndexedScrapeResult&{tfidf: { k:string, v: TfidfMapping }[] };
@@ -214,10 +222,6 @@ export async function indexDocument(inputDoc: ScrapeResult): Promise<TFIDFResult
     }
 
     await pipe.exec();
-
-    rollIdf().catch(err => {
-      console.warn(err.stack);
-    });
 
     return sourceDoc as TFIDFResult;
 }
