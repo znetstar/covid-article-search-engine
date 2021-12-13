@@ -335,7 +335,7 @@ export async function doSearch(input: string): Promise<FinalSearchResult[]> {
 
       match.score = (sim / Math.sqrt(docLen + qLen));
       results.push(match);
-      if (i++ > 20)
+      if (i++ > 50)
         break;
     }
 
