@@ -265,6 +265,12 @@ export async function doSearch(input: string): Promise<FinalSearchResult[]> {
 
     const matches = db.collection('articles').aggregate([
       {
+        $project: {
+          html: 0,
+          'data.content': 0
+        }
+      },
+      {
         $sort: {
           terms_k: 1,
           name: 1
