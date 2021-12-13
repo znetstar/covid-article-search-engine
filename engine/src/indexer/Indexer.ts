@@ -148,6 +148,53 @@ function mergeTerms(sourceDoc: IndexedScrapeResult): [string,number][] {
     return sourceDoc.terms_k.map((k,i) => [k, sourceDoc.terms_v[i]]);
 }
 
+let idfTimeout: any;
+
+export async function rollIdf(): Promise<void> {
+  const {
+    db,
+    redisCache
+  } = await initDatabase();
+  const [[_1, term], [ _2, proceed ]] = await redisCache.pipeline()
+    .rpop('idfQueue')
+    .setnx('idfRoll', 1)
+    .exec();
+
+  if (!term || !proceed)  {
+    if (!idfTimeout)
+      idfTimeout = setTimeout(() => {
+        idfTimeout = void(0);
+        rollIdf().catch((err => console.warn(err.stack)))
+      }, 30e3);
+    return;
+  }
+
+  if (idfTimeout) {
+    clearTimeout(idfTimeout);
+    idfTimeout = void(0);
+  }
+
+  await redisCache.pexpire('idfRoll', 30e3);
+
+  const [[_, idf]] = await redisCache.pipeline()
+    .hget('idfTemp', term)
+    .hdel('idfTemp', term).exec();
+
+  if (idf) {
+    await db.collection('articles').updateMany({
+      // @ts-ignore
+      [`tfidf.k`]: term
+    }, {
+      $set: {
+        [`tfidf.$.v.idf`]: Number(idf)
+      }
+    });
+  }
+
+  await redisCache.del('idfRoll');
+
+  return rollIdf();
+}
 
 type TFIDFResult = IndexedScrapeResult&{tfidf: { k:string, v: TfidfMapping }[] };
 export async function indexDocument(inputDoc: ScrapeResult): Promise<TFIDFResult> {
@@ -160,16 +207,17 @@ export async function indexDocument(inputDoc: ScrapeResult): Promise<TFIDFResult
     const tfidf = await indexTextAsMapping(mergeTerms(sourceDoc));
 
     (sourceDoc as TFIDFResult).tfidf = tfidf;
+    const  pipe = redisCache.pipeline();
     for (let t of tfidf) {
-        await db.collection('articles').updateMany({
-            // @ts-ignore
-            [`tfidf.k`]: t.k
-        }, {
-            $set: {
-                [`tfidf.$.v.idf`]: t.v.idf
-            }
-        });
+        pipe.hset('idfTemp', t.k, t.v.idf);
+        pipe.lpush('idfQueue', t.k);
     }
+
+    await pipe.exec();
+
+    rollIdf().catch(err => {
+      console.warn(err.stack);
+    });
 
     return sourceDoc as TFIDFResult;
 }
